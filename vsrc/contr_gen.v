@@ -175,8 +175,10 @@ module contr_gen(
 
                 // 其他指令（默认）
                 default: begin
-                    ebreak(`ABORT, inst);
-                    $display("contr_gen : Unknown instruction with inst = %h", inst);
+                    if($time != 0) begin
+                        ebreak(`ABORT, inst);
+                        $display("contr_gen : Unknown instruction with inst = %h", inst);
+                    end
                 end
             endcase
         end

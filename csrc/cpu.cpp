@@ -12,10 +12,11 @@
 /********extern functions or variables********/
 
 extern void single_cycle(void);
-extern NPCState npc_state;
+// extern NPCState npc_state;
 extern Vrv32e *top;
 extern VerilatedVcdC *tfp;
 extern vluint64_t main_time;
+extern void die();
 
 /*********************************************/
 
@@ -37,20 +38,22 @@ static void statistic() {
 static void execute_once() {
     PCSet.pc = top->rootp->rv32e__DOT__pc_now;
     PCSet.inst = top->rootp->rv32e__DOT__inst;
-
+    single_cycle();
     single_cycle(); // 执行一个时钟周期
-
+ 
     PCSet.next_pc = top->rootp->rv32e__DOT__pc_now;
     PCSet.ninst = top->rootp->rv32e__DOT__inst;
 }
 
 static void execute(uint64_t n) {
     for (; n > 0; n--) {
+        
         execute_once();
         g_nr_guest_inst++;
 
-        if (npc_state.state != NPC_RUNNING)
+        if (npc_state.state != NPC_RUNNING){
             break;
+        }
     }
 }
 
@@ -80,7 +83,9 @@ void cpu_exec(uint64_t n) {
                 (npc_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
                                            ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
                 npc_state.halt_pc);
+                die();
         case NPC_QUIT:
             statistic();
+            die();
     }
 }

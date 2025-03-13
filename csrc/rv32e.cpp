@@ -19,7 +19,6 @@
 
 extern void ebreak(int station, int inst);
 extern void init_monitor(int argc, char *argv[]);
-extern NPCState npc_state;
 extern void init_monitor(int, char *[]);
 extern void sdb_mainloop();
 extern int is_exit_status_bad();
@@ -41,17 +40,21 @@ extern "C" void ebreak(int station, int inst) {
     switch (station) {
         case HIT_TRAP:
             npc_state.state = NPC_END;
-            _Log(ANSI_FG_GREEN "HIT GOOD TRAP\n" ANSI_NONE);
+            // _Log(ANSI_FG_GREEN "HIT GOOD TRAP\n" ANSI_NONE);
             break;
 
         case ABORT:
         default:
+            Log("maintime = %ld, pc = 0x%08x, inst = 0x%08x", main_time, top->rootp->rv32e__DOT__pc_now, top->rootp->rv32e__DOT__inst);
             npc_state.state = NPC_ABORT;
-            _Log(ANSI_FG_RED "HIT BAD TRAP\n" ANSI_NONE);
+            // _Log(ANSI_FG_RED "HIT BAD TRAP\n" ANSI_NONE);
             break;
     }
-    Log("maintime = %ld, pc = 0x%08x, inst = 0x%08x", main_time, top->rootp->rv32e__DOT__pc_now, top->rootp->rv32e__DOT__inst);
-    Verilated::gotFinish(true);
+    // top->final();
+    // tfp->close();
+    // delete top;
+    // Verilated::gotFinish(true);
+    
 }
 
 extern "C" word_t pmem_read(paddr_t raddr, int len) {
@@ -62,6 +65,8 @@ extern "C" word_t pmem_read(paddr_t raddr, int len) {
 extern "C" void pmem_write(paddr_t waddr, word_t wdata, int len) {
     if (main_time >= start_time) pmem_w(waddr, len, wdata); // 复位结束后才写入
 }
+
+NPCState npc_state = { .state = NPC_STOP };
 
 int is_exit_status_bad() {
     int good = (npc_state.state == NPC_END && npc_state.halt_ret == 0) ||
@@ -99,6 +104,13 @@ void init_verilator(void) {
     reset(); // 执行复位
 }
 
+void die(){
+    top->final();
+    tfp->close();
+    delete top;
+    Verilated::gotFinish(true);
+    // exit(1);
+}
 int main(int argc, char *argv[]) {
     /* Initialize the monitor. */
     init_monitor(argc, argv);

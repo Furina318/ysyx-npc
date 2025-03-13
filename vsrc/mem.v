@@ -27,8 +27,7 @@ module mem(
         end else begin
             // 指令读取（立即可用）
             inst_data <= pmem_read(inst_addr, 4);
-            // 数据读取
-            read_data <= pmem_read(addr, 4);
+            
 
             // 写操作
             if (WrEn) begin
@@ -53,6 +52,7 @@ module mem(
 
             // 读操作
             if (RdEn) begin
+                read_data <= pmem_read(addr, 4);
                 case(MemOp)
                     3'b010: data_out <= read_data;                   // 4字节读 (LW)
                     3'b001: data_out <= {{16{read_data[15]}}, read_data[15:0]};  // 2字节读带符号扩展 (LH)
