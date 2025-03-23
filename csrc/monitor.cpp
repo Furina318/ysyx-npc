@@ -17,7 +17,7 @@ void init_sdb();
 
 
 static void welcome() {
-  Log("MTrace: %s", MUXDEF(CONFIG_MTACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+  Log("MTrace: %s", MUXDEF(CONFIG_MTRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
   Log("ITrace: %s", MUXDEF(CONFIG_ITRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
   Log("FTrace: %s", MUXDEF(CONFIG_FTRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
   Log("Difftest: %s", MUXDEF(CONFIG_DIFFTEST, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
@@ -82,7 +82,7 @@ void load_func_table(const char *elf_file) {
   fseek(fp, 0, SEEK_END);
   long size = ftell(fp);
   Log("The ELF file is %s, size = %ld", elf_file, size);
-  printf("ftrace log : The ELF file is %s, size = %ld\n", elf_file, size);
+  printf("[ftrace log] : The ELF file is %s, size = %ld\n", elf_file, size);
 
   // Read ELF header
   fseek(fp, 0, SEEK_SET);
@@ -227,7 +227,7 @@ void init_monitor(int argc, char *argv[]) {
   /* Initialize the simple debugger. */
   init_sdb();
 
-  IFDEF(CONFIG_ITRACE, init_disasm());
+  // IFDEF(CONFIG_ITRACE, init_disasm());
 
   /* Display welcome message. */
   welcome();

@@ -24,6 +24,7 @@ extern word_t   host_read(void *addr, int len);
 extern word_t   expr(char *e);
 extern "C" void     pmem_write(paddr_t waddr,word_t wdata,int len);
 extern "C" word_t   pmem_read(paddr_t raddr,int len);
+extern void die();
 // extern NPCState npc_state;
 /*********************************************/
 
@@ -53,6 +54,7 @@ static int cmd_c(char *args) {
 
 static int cmd_q(char *args) {
   npc_state.state=NPC_QUIT;//直接改变good的值，防止其直接退出时good！=0（/src/utils/state.c）导致return出现异常
+  die();
   return -1;//只有-1的时候会在sdb_mainloop触发中断影响good
 }
 
@@ -200,32 +202,32 @@ static int cmd_p(char *args) {
 //     return 0;
 // }
 
-// static int cmd_mtrace(char *args){
-// #ifdef CONFIG_MEMORY_TRACE
-//   typedef uint32_t paddr_t;
-//   char *arg1,*arg2,*arg3,*arg4;
-//   // if(args==NULL || strlen(args)<4){
-//   //   printf("No info provide\n");
-//   //   return 0;
-//   // }
-//   // if (arg1 == NULL || arg2 == NULL || arg3 == NULL || arg4 == NULL) {
-//   //   printf("Invalid arguments\n");
-//   //   return 0;
-//   // }
-//   arg1=strtok(args," ");
-//   arg2=strtok(NULL," ");
-//   arg3=strtok(NULL," ");
-//   arg4=strtok(NULL," ");
-//   paddr_t start_addr=(arg1!=NULL) ? strtoul(arg1, NULL, 16) : 0x80000000;
-//   paddr_t end_addr=(arg2!=NULL) ? strtoul(arg2, NULL, 16) : 0x8FFFFFFF;
-//   bool filter_en=(arg3!=NULL) ? atoi(arg3) : false;
-//   uint32_t filter_data=(arg4!=NULL) ? strtoul(arg4,NULL,16) : 0xFFFFFFFF;
-//   mtrace_filter_output(start_addr,end_addr,filter_en,filter_data);
-//   return 0;
-// #endif
-//   printf("memory trace not open\n");
-//   return 0;
-// }
+static int cmd_mtrace(char *args){
+#ifdef CONFIG_MTRACE
+  typedef uint32_t paddr_t;
+  char *arg1,*arg2,*arg3,*arg4;
+  // if(args==NULL || strlen(args)<4){
+  //   printf("No info provide\n");
+  //   return 0;
+  // }
+  // if (arg1 == NULL || arg2 == NULL || arg3 == NULL || arg4 == NULL) {
+  //   printf("Invalid arguments\n");
+  //   return 0;
+  // }
+  arg1=strtok(args," ");
+  arg2=strtok(NULL," ");
+  arg3=strtok(NULL," ");
+  arg4=strtok(NULL," ");
+  paddr_t start_addr=(arg1!=NULL) ? strtoul(arg1, NULL, 16) : 0x80000000;
+  paddr_t end_addr=(arg2!=NULL) ? strtoul(arg2, NULL, 16) : 0x8FFFFFFF;
+  bool filter_en=(arg3!=NULL) ? atoi(arg3) : false;
+  uint32_t filter_data=(arg4!=NULL) ? strtoul(arg4,NULL,16) : 0xFFFFFFFF;
+  mtrace_filter_output(start_addr,end_addr,filter_en,filter_data);
+  return 0;
+#endif
+  printf("memory trace not open\n");
+  return 0;
+}
 
 static int cmd_help(char *args);
 
@@ -246,7 +248,7 @@ static struct {
 //   { "w", "Set watchpoint on 'EXPR',the programme will stop when it change",cmd_w},
 //   { "d", "Delete a watchpoint NO.n you set",cmd_d},
 //   { "test", "Open random-expressions-file to check expr() whether correct",cmd_test},
-  // { "mtrace", "(Use when nemu stop)Open mtrace log file to check memory behavior",cmd_mtrace},
+  { "mtrace", "(Use when nemu stop)Open mtrace log file to check memory behavior",cmd_mtrace},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
